@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from "react";
+import init from "react-native-mqtt";
+import { AsyncStorage } from "react-native";
+import HookMqtt from "./components/Hooks/";
+
 import {
   Platform,
   Text,
@@ -37,45 +41,6 @@ export default function App() {
       let location = await Location.getCurrentPositionAsync({});
       setLocation(location);
     })();
-
-    //MQTT Setup
-    this.mqttConnect = new MQTTConnection();
-    this.mqttConnect.onMQTTConnect = this.onMQTTConnect;
-    this.mqttConnect.onMQTTLost = this.onMQTTLost;
-    this.mqttConnect.onMQTTMessageArrived = this.onMQTTMessageArrived;
-    this.mqttConnect.onMQTTMessageDelivered = this.onMQTTMessageDelivered;
-
-    // this.mqttConnect.connect(ip, port);
-    this.mqttConnect.connect("broker.hivemq.com", 1883);
-    // this.mqttConnect.connect("broker.mqttdashboard.com", 8000);
-
-    onMQTTConnect = () => {
-      console.log("App onMQTTConnect");
-      this.mqttConnect.subscribeChannel(
-        "tb/mqtt-integration-tutorial/sensors/Device_1/temperature"
-      );
-      // this.mqttConnect.subscribeChannel("hanth2");
-    };
-
-    onMQTTLost = () => {
-      console.log("App onMQTTLost");
-    };
-
-    onMQTTMessageArrived = (message) => {
-      console.log("App onMQTTMessageArrived: ", message);
-      console.log(
-        "APP onMQTTMessageArrived payloadString: ",
-        message.payloadString
-      );
-    };
-
-    onMQTTMessageDelivered = (message) => {
-      console.log("App onMQTTMessageDelivered: ", message);
-    };
-
-    return () => {
-      this.mqttConnect.close();
-    };
   }, [pressed]);
 
   let text = "Waiting..";
@@ -100,12 +65,7 @@ export default function App() {
             setPressed(!pressed);
           }}
         />
-        {/* <Button
-          title="Send data"
-          onPress={() =>
-            this.mqttConnect.send("hanth2", "{'temperature':4231}")
-          }
-        /> */}
+        <HookMqtt />
       </View>
     </>
   );
@@ -123,3 +83,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
+
+/* <Button
+          title="Send data"
+          onPress={() =>
+            this.mqttConnect.send("hanth2", "{'temperature':4231}")
+          }
+        /> */
