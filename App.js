@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import init from "react-native-mqtt";
 import { AsyncStorage } from "react-native";
-import HookMqtt from "./components/Hooks/";
-
+import ClassMqtt from "./components/Class/";
 import {
   Platform,
   Text,
@@ -55,17 +54,8 @@ export default function App() {
       <Header />
       <View style={styles.container}>
         <Text style={styles.paragraph}>{text}</Text>
-        <Button
-          title="Send data"
-          onPress={() => {
-            this.mqttConnect.send(
-              "tb/mqtt-integration-tutorial/sensors/Device_2/temperature",
-              "{'temperature':42}"
-            );
-            setPressed(!pressed);
-          }}
-        />
-        <HookMqtt />
+
+        <ClassMqtt />
       </View>
     </>
   );
@@ -84,9 +74,14 @@ const styles = StyleSheet.create({
   },
 });
 
-/* <Button
+
+        {/* <Button
           title="Send data"
-          onPress={() =>
-            this.mqttConnect.send("hanth2", "{'temperature':4231}")
-          }
-        /> */
+          onPress={() => {
+            this.mqttConnect.send(
+              "tb/mqtt-integration-tutorial/sensors/Device_2/temperature",
+              "{'temperature':42}"
+            );
+            setPressed(!pressed);
+          }}
+        /> */}
