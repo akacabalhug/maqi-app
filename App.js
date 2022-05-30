@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import init from "react-native-mqtt";
 import { AsyncStorage } from "react-native";
 import HookMqtt from "./components/Hooks/";
-
+import init from "react_native_mqtt";
 import {
   Platform,
   Text,
@@ -18,6 +18,15 @@ import * as Location from "expo-location";
 import Header from "./components/header";
 import { Buffer } from "buffer";
 global.Buffer = Buffer;
+
+init({
+  size: 10000,
+  storageBackend: AsyncStorage,
+  defaultExpires: 1000 * 3600 * 24,
+  enableCache: true,
+  reconnect: true,
+  sync: {},
+});
 
 export default function App() {
   const [location, setLocation] = useState(null);
