@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { Card, Form, Input, Row, Col, Select } from "antd";
 import { View, Button } from "react-native";
-import { QosOption } from "./index";
+import { QosOption } from ".";
 
 const Publisher = ({ publish }) => {
   const [form] = Form.useForm();
