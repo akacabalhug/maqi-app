@@ -83,14 +83,15 @@ export default class ClassMqtt extends Component {
     this.watchId = Location.watchPositionAsync(
       {
         accuracy: Location.Accuracy.High,
-        timeInterval: 10000,
-        distanceInterval: 1,
+        timeInterval: 20000,
+        distanceInterval: 10,
       },
       (position) => {
-        console.log("position", position);
+        // console.log("position", position);
         this.setState({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
+          time: position.timestamp,
           error: null,
         });
       }
@@ -103,6 +104,15 @@ export default class ClassMqtt extends Component {
       } else {
         this.dump("Change is not to Wifi");
       }
+    });
+    this.send_payload({
+      temperature: 25,
+      latitude: this.state.latitude,
+      longitude: this.state.longitude,
+      altitude: 33.1589241027832,
+      humidity: 30,
+      pm10: 10,
+      pm25: 3,
     });
   }
 
@@ -126,17 +136,7 @@ export default class ClassMqtt extends Component {
     //     this.scanAndConnect();
     //     subscription.remove();
     //   }
-    // }, true);
-
-    // this.send_payload({
-    //   temperature: 25,
-    //   latitude: 14.3108,
-    //   longitude: 121.041,
-    //   altitude: 33.1589241027832,
-    //   humidity: 30,
-    //   pm10: 10,
-    //   pm25: 3,
-    // });
+    // }, true)console.log("latitude", this.state.latitude);
   }
 
   tick() {
@@ -310,21 +310,25 @@ export default class ClassMqtt extends Component {
   }
 
   async send_payload(item) {
-    client = new Paho.MQTT.Client("3.0.58.83", 8083, "/mqtt", "");
+    console.log("payload", JSON.stringify(item));
+    client = new Paho.MQTT.Client("13.215.176.140", 8083, "/mqtt", "");
     client.onConnectionLost = onConnectionLost;
     client.onMessageArrived = onMessageArrived;
-    client.connect({ onSuccess: onConnect });
+    client.connect({ onSuccess: onConnect, onFailure: onConnectionLost });
     function onConnect() {
+      console.log("connected");
       const message = new Paho.MQTT.Message(
-        item,
+        JSON.stringify(item),
         "v1/devices/me/telemetry",
         1,
         0
       );
       message.destinationName = "v1/devices/me/telemetry";
       client.publish(message);
+      console.log("Done publishing");
     }
     function onConnectionLost(responseObject) {
+      console.log("disconnected");
       if (responseObject.errorCode !== 0) {
         console.log("onConnectionLost:" + responseObject.errorMessage);
       }
@@ -339,6 +343,9 @@ export default class ClassMqtt extends Component {
       <View style={styles.container}>
         <Text style={styles.info}> {this.state.info}</Text>
         <Text style={styles.welcome}>Welcome to BLE Daemon!</Text>
+        <Text style={styles.info}>Latitude: {this.state.latitude}</Text>
+        <Text style={styles.info}>Longitude: {this.state.longitude}</Text>
+        <Text style={styles.info}>Timestamp: {this.state.time}</Text>
         <Text style={styles.info}> {this.state.dump}</Text>
         <Text style={styles.info}> {this.state.dump_data}</Text>
         <Text style={styles.infoheader}>Notify</Text>
