@@ -94,6 +94,16 @@ export default class ClassMqtt extends Component {
           time: position.timestamp,
           error: null,
         });
+        this.send_payload({
+          device_id: "Device_2",
+          temperature: 25,
+          latitude: this.state.latitude,
+          longitude: this.state.longitude,
+          altitude: 33.1589241027832,
+          humidity: 30,
+          pm10: 15,
+          pm25: 15,
+        });
       }
     );
     //NetInfo.addEventListener("connectionChange", (connectionInfo) => {
@@ -104,15 +114,6 @@ export default class ClassMqtt extends Component {
       } else {
         this.dump("Change is not to Wifi");
       }
-    });
-    this.send_payload({
-      temperature: 25,
-      latitude: this.state.latitude,
-      longitude: this.state.longitude,
-      altitude: 33.1589241027832,
-      humidity: 30,
-      pm10: 10,
-      pm25: 3,
     });
   }
 
@@ -249,9 +250,11 @@ export default class ClassMqtt extends Component {
     // Send and Delete Entries in memory
     this.dump("Dumping All Contents!");
     this.dump_data("Dumping current Content");
+    const device_ID = "Device_2";
+    const topic = `tb/mqtt-integration-guide/sensors/${device_ID}/telemetry`;
     var message = "";
     await AsyncStorage.removeItem("counter");
-    client = new Paho.MQTT.Client("3.0.58.83", 8083, "/mqtt", "");
+    client = new Paho.MQTT.Client("52.221.240.129", 8083, "/mqtt", "");
     client.onConnectionLost = onConnectionLost;
     client.onMessageArrived = onMessageArrived;
     client.connect({ onSuccess: onConnect });
@@ -263,13 +266,8 @@ export default class ClassMqtt extends Component {
         if (mqtt_payload_dump == null) {
           dump_counter = 64;
         } else {
-          message = new Paho.MQTT.Message(
-            mqtt_payload_dump,
-            "v1/devices/me/telemetry",
-            1,
-            0
-          );
-          message.destinationName = "v1/devices/me/telemetry";
+          message = new Paho.MQTT.Message(mqtt_payload_dump, topic, 1, 0);
+          message.destinationName = topic;
           client.publish(message);
           await AsyncStorage.removeItem(dump_key);
           dump_counter = dump_counter + 1;
@@ -311,19 +309,16 @@ export default class ClassMqtt extends Component {
 
   async send_payload(item) {
     console.log("payload", JSON.stringify(item));
-    client = new Paho.MQTT.Client("13.215.176.140", 8083, "/mqtt", "");
+    const device_ID = "Device_2";
+    const topic = `tb/mqtt-integration-guide/sensors/${device_ID}/telemetry`;
+    client = new Paho.MQTT.Client("52.221.240.129", 8083, "/mqtt", "");
     client.onConnectionLost = onConnectionLost;
     client.onMessageArrived = onMessageArrived;
     client.connect({ onSuccess: onConnect, onFailure: onConnectionLost });
     function onConnect() {
       console.log("connected");
-      const message = new Paho.MQTT.Message(
-        JSON.stringify(item),
-        "v1/devices/me/telemetry",
-        1,
-        0
-      );
-      message.destinationName = "v1/devices/me/telemetry";
+      const message = new Paho.MQTT.Message(JSON.stringify(item), topic, 1, 0);
+      message.destinationName = topic;
       client.publish(message);
       console.log("Done publishing");
     }
