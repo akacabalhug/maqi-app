@@ -92,17 +92,36 @@ export default class ClassMqtt extends Component {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
           time: position.timestamp,
+          altitude: position.altitude,
           error: null,
         });
+        let test =
+          '{"ts":123000,"values":{"pm10":"12","pm25":"9","temp":"","hum":"","long":"121.04664227522113","lat":"14.553687875023439"}}';
+        let test_split = test.split(/[:|,]/);
+
+        if (test_split[8].slice(1, -1) == "") test_split[8] = '"0"';
+        if (test_split[10].slice(1, -1) == "") test_split[10] = '"0"';
+
+        let payload = {
+          timestamp: parseInt(test_split[1]),
+          pm10: parseInt(test_split[4].slice(1, -1)),
+          pm25: parseInt(test_split[6].slice(1, -1)),
+          temperature: parseInt(test_split[8].slice(1, -1)),
+          humidity: parseInt(test_split[10].slice(1, -1)),
+          latitude: parseInt(test_split[12].slice(1, -1)),
+          longitude: parseInt(test_split[14].slice(1, -1)),
+        };
         this.send_payload({
+          payload,
           device_id: "Device_2",
-          temperature: 25,
-          latitude: this.state.latitude,
-          longitude: this.state.longitude,
-          altitude: 33.1589241027832,
-          humidity: 30,
-          pm10: 15,
-          pm25: 15,
+          // timestamp: this.state.timestamp,
+          // latitude: this.state.latitude,
+          // longitude: this.state.longitude,
+          // altitude: this.state.altitude,
+          // temperature: 25,
+          // humidity: 30,
+          // pm10: 15,
+          // pm25: 15,
         });
       }
     );
