@@ -25,6 +25,7 @@ export default class ClassMqtt extends Component {
       device: null,
       latitude: null,
       longitude: null,
+      altitude: null,
       time: null,
       counter: null,
       key: null,
@@ -87,7 +88,7 @@ export default class ClassMqtt extends Component {
         distanceInterval: 10,
       },
       (position) => {
-        // console.log("position", position);
+        console.log("position", position);
         this.setState({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
@@ -95,8 +96,10 @@ export default class ClassMqtt extends Component {
           altitude: position.altitude,
           error: null,
         });
+
+        this.setState({ device: "Device_1" });
         let test =
-          '{"ts":123000,"values":{"pm10":"12","pm25":"9","temp":"","hum":"","long":"121.04664227522113","lat":"14.553687875023439"}}';
+          '{"ts":123000,"values":{"pm10":"12","pm25":"12","temp":"25","hum":"23","long":"121.04664227522113","lat":"14.553687875023439"}}';
         let test_split = test.split(/[:|,]/);
 
         if (test_split[8].slice(1, -1) == "") test_split[8] = '"0"';
@@ -112,16 +115,8 @@ export default class ClassMqtt extends Component {
           longitude: parseInt(test_split[14].slice(1, -1)),
         };
         this.send_payload({
-          payload,
-          device_id: "Device_2",
-          // timestamp: this.state.timestamp,
-          // latitude: this.state.latitude,
-          // longitude: this.state.longitude,
-          // altitude: this.state.altitude,
-          // temperature: 25,
-          // humidity: 30,
-          // pm10: 15,
-          // pm25: 15,
+          ...payload,
+          device_id: this.state.device,
         });
       }
     );
@@ -269,11 +264,11 @@ export default class ClassMqtt extends Component {
     // Send and Delete Entries in memory
     this.dump("Dumping All Contents!");
     this.dump_data("Dumping current Content");
-    const device_ID = "Device_2";
+    const device_ID = this.state.device;
     const topic = `tb/mqtt-integration-guide/sensors/${device_ID}/telemetry`;
     var message = "";
     await AsyncStorage.removeItem("counter");
-    client = new Paho.MQTT.Client("52.221.240.129", 8083, "/mqtt", "");
+    client = new Paho.MQTT.Client("18.140.52.158", 8083, "/mqtt", "");
     client.onConnectionLost = onConnectionLost;
     client.onMessageArrived = onMessageArrived;
     client.connect({ onSuccess: onConnect });
@@ -328,9 +323,9 @@ export default class ClassMqtt extends Component {
 
   async send_payload(item) {
     console.log("payload", JSON.stringify(item));
-    const device_ID = "Device_2";
+    const device_ID = this.state.device;
     const topic = `tb/mqtt-integration-guide/sensors/${device_ID}/telemetry`;
-    client = new Paho.MQTT.Client("52.221.240.129", 8083, "/mqtt", "");
+    client = new Paho.MQTT.Client("18.140.52.158", 8083, "/mqtt", "");
     client.onConnectionLost = onConnectionLost;
     client.onMessageArrived = onMessageArrived;
     client.connect({ onSuccess: onConnect, onFailure: onConnectionLost });
@@ -339,7 +334,7 @@ export default class ClassMqtt extends Component {
       const message = new Paho.MQTT.Message(JSON.stringify(item), topic, 1, 0);
       message.destinationName = topic;
       client.publish(message);
-      console.log("Done publishing");
+      console.log("Done publishing", item);
     }
     function onConnectionLost(responseObject) {
       console.log("disconnected");
